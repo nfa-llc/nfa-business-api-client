@@ -1,0 +1,459 @@
+openapi: 3.0.1
+info:
+  title: business.gexbot.com
+  description: business.gexbot.com
+  version: '1.0'
+servers:
+  - url: https://business.gexbot.com
+paths:
+  /user/children:
+    get:
+      operationId: get-user-children
+      tags:
+        - User
+        - Children
+      summary: "List children accounts"
+      description: "Retrieve a list of children accounts managed by the parent."
+      parameters:
+        - name: Cookie
+          in: header
+          required: true
+          schema:
+            type: string
+          description: "Session cookie for authentication"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChildListResponse'
+    post:
+      operationId: post-user-children
+      tags:
+        - User
+        - Children
+      summary: "Create child account"
+      description: "Create a new child account for a specific product and integration."
+      parameters:
+        - name: Cookie
+          in: header
+          required: true
+          schema:
+            type: string
+          description: "Session cookie for authentication"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChildRequest'
+      responses:
+        '200':
+          description: "OK"
+  /user/children/{child_id}:
+    get:
+      operationId: get-user-child
+      tags:
+        - User
+        - Children
+      summary: "Get child account details"
+      description: "Retrieve details of a specific child account."
+      parameters:
+        - name: Cookie
+          in: header
+          required: true
+          schema:
+            type: string
+          description: "Session cookie for authentication"
+        - name: child_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Child'
+    delete:
+      operationId: delete-user-child
+      tags:
+        - User
+        - Children
+      summary: "Delete child account"
+      description: "Delete a specific child account."
+      parameters:
+        - name: Cookie
+          in: header
+          required: true
+          schema:
+            type: string
+          description: "Session cookie for authentication"
+        - name: child_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "OK"
+  /user/children/{child_id}/key:
+    post:
+      operationId: post-user-child-key
+      tags:
+        - User
+        - Children
+        - API Key
+      summary: "Create child API key"
+      description: "Create a new API key for a child account."
+      parameters:
+        - name: Cookie
+          in: header
+          required: true
+          schema:
+            type: string
+          description: "Session cookie for authentication"
+        - name: child_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApiKeyRequest'
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+    patch:
+      operationId: patch-user-child-key
+      tags:
+        - User
+        - Children
+        - API Key
+      summary: "Rotate child API key"
+      description: "Rotate an existing API key for a child account."
+      parameters:
+        - name: Cookie
+          in: header
+          required: true
+          schema:
+            type: string
+          description: "Session cookie for authentication"
+        - name: child_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateApiKeyRequest'
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+    delete:
+      operationId: delete-user-child-key
+      tags:
+        - User
+        - Children
+        - API Key
+      summary: "Delete child API key"
+      description: "Delete an API key for a child account."
+      parameters:
+        - name: Cookie
+          in: header
+          required: true
+          schema:
+            type: string
+          description: "Session cookie for authentication"
+        - name: child_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteApiKeyRequest'
+      responses:
+        '200':
+          description: "OK"
+  /user/keys:
+    get:
+      operationId: get-user-keys
+      tags:
+        - User
+        - API Key
+      summary: "List personal API keys"
+      description: "Retrieve a list of personal API keys."
+      parameters:
+        - name: Cookie
+          in: header
+          required: true
+          schema:
+            type: string
+          description: "Session cookie for authentication"
+        - name: product
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: integration
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyListResponse'
+    post:
+      operationId: post-user-keys
+      tags:
+        - User
+        - API Key
+      summary: "Create personal API key"
+      description: "Create a new personal API key."
+      parameters:
+        - name: Cookie
+          in: header
+          required: true
+          schema:
+            type: string
+          description: "Session cookie for authentication"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApiKeyRequest'
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+    patch:
+      operationId: patch-user-keys
+      tags:
+        - User
+        - API Key
+      summary: "Rotate personal API key"
+      description: "Rotate an existing personal API key."
+      parameters:
+        - name: Cookie
+          in: header
+          required: true
+          schema:
+            type: string
+          description: "Session cookie for authentication"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateApiKeyRequest'
+      responses:
+        '200':
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+    delete:
+      operationId: delete-user-keys
+      tags:
+        - User
+        - API Key
+      summary: "Delete personal API key"
+      description: "Delete an existing personal API key."
+      parameters:
+        - name: Cookie
+          in: header
+          required: true
+          schema:
+            type: string
+          description: "Session cookie for authentication"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteApiKeyRequest'
+      responses:
+        '200':
+          description: "OK"
+components:
+  schemas:
+    _float:
+      type: number
+      format: float
+    _double:
+      type: number
+      format: double
+    _int:
+      type: integer
+    _int32:
+      type: integer
+      format: int32
+    _int64:
+      type: integer
+      format: int32
+    _string:
+      type: string
+    _date:
+      type: string
+      format: date
+      example: '2025-08-19'
+    _timestamp:
+      type: string
+      format: date-time
+      example: '2025-08-19T12:00:00.000Z'
+    ApiKeyResponse:
+      type: object
+      properties:
+        key:
+          $ref: '#/components/schemas/apiKeyString'
+    apiKeyString:
+      maxLength: 12
+      minLength: 12
+      type: string
+      format: password
+    Child:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/_string'
+        parent_user_id:
+          $ref: '#/components/schemas/_string'
+        level:
+          type: array
+          items:
+            $ref: '#/components/schemas/level'
+        api_keys:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiKey'
+        created:
+          $ref: '#/components/schemas/_timestamp'
+    ChildListResponse:
+      type: object
+      properties:
+        count:
+          $ref: '#/components/schemas/_int'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Child'
+    ApiKey:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/_string'
+        secret:
+          $ref: '#/components/schemas/_string'
+        identifier:
+          $ref: '#/components/schemas/_string'
+        product:
+          $ref: '#/components/schemas/_string'
+        label:
+          $ref: '#/components/schemas/_string'
+        integration:
+          $ref: '#/components/schemas/_string'
+        created_at:
+          $ref: '#/components/schemas/_timestamp'
+        expires_at:
+          $ref: '#/components/schemas/_timestamp'
+    ApiKeyListResponse:
+      type: object
+      properties:
+        count:
+          $ref: '#/components/schemas/_int'
+        api_keys:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiKey'
+    CreateChildRequest:
+      type: object
+      properties:
+        product:
+          $ref: '#/components/schemas/_string'
+        integration:
+          $ref: '#/components/schemas/_string'
+        label:
+          $ref: '#/components/schemas/_string'
+    CreateApiKeyRequest:
+      type: object
+      properties:
+        product:
+          $ref: '#/components/schemas/_string'
+        integration:
+          $ref: '#/components/schemas/_string'
+        label:
+          $ref: '#/components/schemas/_string'
+        expires_in:
+          $ref: '#/components/schemas/_int'
+    UpdateApiKeyRequest:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/_string'
+        product:
+          $ref: '#/components/schemas/_string'
+        label:
+          $ref: '#/components/schemas/_string'
+        expires_in:
+          $ref: '#/components/schemas/_int'
+    DeleteApiKeyRequest:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/_string'
+        product:
+          $ref: '#/components/schemas/_string'
+    level:
+      enum:
+        - orderflow
+        - classic
+        - state
+        - free
+        - paid
+        - unverified
+        - unpaid
+      type: string
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      name: Ocp-Apim-Subscription-Key
+      in: header
+    nfaBearerAuth:
+      type: http
+      scheme: bearer
+security:
+  - apiKeyHeader: [ ]
+  - nfaBearerAuth: [ ]
+tags:
+  - name: Authentication
+    description: Authentication
+  - name: User
+    description: User operations
