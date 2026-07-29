@@ -1,91 +1,102 @@
-# NFA Business API Python Example
+# NFA Commercial Python Example
 
-Reference Python client for commercial partners using the NFA Business API.
+This repository contains a Python example for the GEXBOT commercial keybundle API.
+It models backend automation.
+It is not an end-user command-line application.
 
-Use your business key to manage child users and commercial API keys from your
-own backend. For example, when a customer signs up for your service, your
-backend can create a child user and receive that child's one-time Gexbot API key
-secret.
+A commercial customer uses an `nfa` product API key to manage child seats.
+Each child can have one current API key.
+Every child key uses the `custom` integration.
+A child tier can be `classic`, `state`, or `orderflow`.
+Keybundle children do not receive Quant or WebSocket access.
 
-Do not expose your business key in browsers, mobile apps, desktop plugins, or
-other customer-controlled environments.
+## Supported API operations
 
-## Endpoint Reference
+The client supports these API-key-authenticated routes:
 
-For the structured endpoint layout, request bodies, and response schemas, see
-[`business-prod-business.yaml`](business-prod-business.yaml). This README shows
-the practical Python usage for the same API surface.
+```text
+GET    /user/children
+GET    /user/children/{childId}
+POST   /user/children
+PATCH  /user/children/{childId}/subscription
+DELETE /user/children/{childId}
+POST   /user/children/{childId}/key
+PATCH  /user/children/{childId}/key
+DELETE /user/children/{childId}/key
+PATCH  /user/children/keys
+GET    /user/commercial-billing?month=YYYY-MM
+```
 
-The example client calls these API-key-authenticated business routes:
+`POST /user/children` creates one child and one custom API key.
+The response contains the API key secret once.
+Store the secret immediately.
 
-- `GET /user/children`
-- `GET /user/children/{childId}`
-- `POST /user/children`
-- `DELETE /user/children/{childId}`
-- `POST /user/children/{childId}/key`
-- `PATCH /user/children/{childId}/key`
-- `DELETE /user/children/{childId}/key`
+`POST /user/children/{childId}/key` creates a key only when the child is keyless.
+Revoking a key does not delete the child.
+A keyless child remains an active billable seat.
+Deleting the child stops future seat billing.
+
+The contract controls allowed products, allowed child tiers, per-product key limits, and the total key limit.
+The API returns an error when an operation exceeds the contract.
+
+This repository does not implement server batch operations.
+Call the individual operations separately.
+Treat each successful mutation as final if a later request fails.
 
 ## Setup
 
-Requires Python 3.9 or newer. This repo uses only the Python standard library.
+Python 3.9 or newer is required.
+The example uses only the Python standard library.
+
+Copy the environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-Keep `.env` in this directory, next to the `src/` folder:
+Set the API key in `.env`:
 
 ```text
-nfa-business-api-client/
-  .env
-  src/
+NFA_API_KEY=your_nfa_product_key_secret
 ```
 
-Set:
+The client sends all requests to this public endpoint:
 
-```bash
-export NFA_BASE_URL="https://business.gexbot.com"
-export NFA_API_KEY="your_business_key_secret"
+```text
+https://business.gexbot.com
 ```
 
-Keep `NFA_BASE_URL` at the host root. The Python client adds each `/user` route
-path for you.
-
-Requests authenticate with your business key:
+The client sends the key in this header:
 
 ```http
-Authorization: Bearer <YOUR_BUSINESS_KEY>
+Authorization: Bearer <YOUR_NFA_PRODUCT_KEY>
 ```
 
-## Check Your Access
+## Run the safe smoke test
 
 ```bash
 python3 src/demo.py
 ```
 
-By default, `src/demo.py` only lists existing child users. It does not create,
-rotate, or revoke anything, so it is the safest first command after setting
-`NFA_API_KEY`.
+The default demo only lists existing children.
+It does not create, rotate, or revoke a key.
 
-## Example Workflows
+## Example workflows
 
-Use `src/demo.py` as the starting point for backend automation:
+`src/demo.py` contains examples for these workflows:
 
-- `provision_child_for_customer(...)` creates a child user and child API key.
-- `batch_provision_children(...)` creates child users for several customers.
-- `rotate_child_key(...)` rotates a specific child key.
-- `revoke_child_access(...)` revokes a child user's access.
+- Create a child at an explicit tier.
+- Change a child tier.
+- Rotate a child key.
+- Revoke a child by deleting the child account.
+- Query current or historical billing.
 
-Uncomment one workflow at a time when testing actions that create, rotate, or
-revoke access.
+Uncomment one workflow at a time.
 
-To create one child user and print the response:
+Run the small create-only example with:
 
 ```bash
 python3 src/create_child.py
 ```
 
-Secrets returned from create and rotate responses are shown once. Store them
-immediately in your own secret manager, along with the returned `child_id` and
-API key `id`; rotations and revocations need those identifiers later.
+The checked-in OpenAPI file describes the same public routes and request constraints.
