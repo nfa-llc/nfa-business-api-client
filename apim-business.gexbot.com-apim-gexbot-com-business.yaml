@@ -1,47 +1,33 @@
 openapi: 3.0.1
 info:
-  title: business.gexbot.com
-  description: business.gexbot.com
+  title: GEXBOT Commercial Keybundle API
+  description: Public API for commercial child and key management
   version: '1.0'
 servers:
-  - url: https://business.gexbot.com
+- url: https://business.gexbot.com
 paths:
   /user/children:
     get:
-      operationId: get-user-children
       tags:
-        - User
-        - Children
-      summary: "List children accounts"
-      description: "Retrieve a list of children accounts managed by the parent."
-      parameters:
-        - name: Cookie
-          in: header
-          required: true
-          schema:
-            type: string
-          description: "Session cookie for authentication"
+      - User
+      - Children
+      summary: List children accounts
+      description: Retrieve a list of children accounts managed by the parent.
+      operationId: get-user-children
       responses:
         '200':
-          description: "OK"
+          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChildListResponse'
     post:
-      operationId: post-user-children
       tags:
-        - User
-        - Children
-      summary: "Create child account"
-      description: "Create a new child account for a specific product and integration."
-      parameters:
-        - name: Cookie
-          in: header
-          required: true
-          schema:
-            type: string
-          description: "Session cookie for authentication"
+      - User
+      - Children
+      summary: Create child account and custom API key
+      description: Create one child at an allowed tier and return its one-time custom API key secret.
+      operationId: post-user-children
       requestBody:
         content:
           application/json:
@@ -49,109 +35,138 @@ paths:
               $ref: '#/components/schemas/CreateChildRequest'
       responses:
         '200':
-          description: "OK"
+          description: Created child and one-time custom API key secret
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Child'
   /user/children/{child_id}:
     get:
-      operationId: get-user-child
       tags:
-        - User
-        - Children
-      summary: "Get child account details"
-      description: "Retrieve details of a specific child account."
+      - User
+      - Children
+      summary: Get child account details
+      description: Retrieve details of a specific child account.
+      operationId: get-user-child
       parameters:
-        - name: Cookie
-          in: header
-          required: true
-          schema:
-            type: string
-          description: "Session cookie for authentication"
-        - name: child_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: child_id
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         '200':
-          description: "OK"
+          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Child'
     delete:
-      operationId: delete-user-child
       tags:
-        - User
-        - Children
-      summary: "Delete child account"
-      description: "Delete a specific child account."
+      - User
+      - Children
+      summary: Delete child account
+      description: Delete a specific child account.
+      operationId: delete-user-child
       parameters:
-        - name: Cookie
-          in: header
-          required: true
-          schema:
-            type: string
-          description: "Session cookie for authentication"
-        - name: child_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: child_id
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         '200':
-          description: "OK"
+          description: OK
+  /user/children/{child_id}/subscription:
+    patch:
+      tags:
+      - User
+      - Children
+      summary: Change a commercial child tier immediately
+      description: Change one active seat to an allowed Classic, State, or Orderflow tier. Billing grace rules apply independently.
+      operationId: patch-user-child-subscription
+      parameters:
+      - name: child_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChildSubscriptionChangeRequest'
+      responses:
+        '200':
+          description: Updated child seat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Child'
+  /user/commercial-billing:
+    get:
+      tags:
+      - User
+      - Children
+      summary: Get observed commercial child-seat billing composition
+      description: Returns only usage observed through the request time; future seat usage is never forecast.
+      operationId: get-user-commercial-billing
+      parameters:
+      - name: month
+        in: query
+        required: false
+        schema:
+          type: string
+          pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$'
+      responses:
+        '200':
+          description: Observed estimate and current Stripe draft summary when present
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommercialBillingResponse'
   /user/children/{child_id}/key:
     post:
-      operationId: post-user-child-key
       tags:
-        - User
-        - Children
-        - API Key
-      summary: "Create child API key"
-      description: "Create a new API key for a child account."
+      - User
+      - API Key
+      - Children
+      summary: Create the custom API key for a keyless child
+      description: A commercial child can have at most one current custom API key.
+      operationId: post-user-child-key
       parameters:
-        - name: Cookie
-          in: header
-          required: true
-          schema:
-            type: string
-          description: "Session cookie for authentication"
-        - name: child_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: child_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateApiKeyRequest'
+              $ref: '#/components/schemas/CreateChildApiKeyRequest'
       responses:
         '200':
-          description: "OK"
+          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiKey'
     patch:
-      operationId: patch-user-child-key
       tags:
-        - User
-        - Children
-        - API Key
-      summary: "Rotate child API key"
-      description: "Rotate an existing API key for a child account."
+      - User
+      - API Key
+      - Children
+      summary: Rotate the current child API key
+      description: Return one replacement secret. The old rotated key can remain valid during the rollover period.
+      operationId: patch-user-child-key
       parameters:
-        - name: Cookie
-          in: header
-          required: true
-          schema:
-            type: string
-          description: "Session cookie for authentication"
-        - name: child_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: child_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -159,31 +174,25 @@ paths:
               $ref: '#/components/schemas/UpdateApiKeyRequest'
       responses:
         '200':
-          description: "OK"
+          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiKey'
     delete:
-      operationId: delete-user-child-key
       tags:
-        - User
-        - Children
-        - API Key
-      summary: "Delete child API key"
-      description: "Delete an API key for a child account."
+      - User
+      - API Key
+      - Children
+      summary: Revoke the current child API key
+      description: Revoke the key without deleting the child. The keyless child remains an active billable seat.
+      operationId: delete-user-child-key
       parameters:
-        - name: Cookie
-          in: header
-          required: true
-          schema:
-            type: string
-          description: "Session cookie for authentication"
-        - name: child_id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: child_id
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -191,58 +200,63 @@ paths:
               $ref: '#/components/schemas/DeleteApiKeyRequest'
       responses:
         '200':
-          description: "OK"
-  /user/keys:
-    get:
-      operationId: get-user-keys
+          description: OK
+  /user/children/keys:
+    patch:
       tags:
-        - User
-        - API Key
-      summary: "List personal API keys"
-      description: "Retrieve a list of personal API keys."
-      parameters:
-        - name: Cookie
-          in: header
-          required: true
-          schema:
-            type: string
-          description: "Session cookie for authentication"
-        - name: product
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: integration
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: status
-          in: query
-          required: false
-          schema:
-            type: string
+      - User
+      - API Key
+      - Children
+      summary: Rotate all current child API keys
+      description: Rotate each current child key and return each replacement secret once. Processing is sequential and is not transactional.
+      operationId: patch-user-children-keys
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateApiKeyRequest'
       responses:
         '200':
-          description: "OK"
+          description: Rotated child API keys
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyListResponse'
+  /user/keys:
+    get:
+      tags:
+      - User
+      - API Key
+      summary: List personal API keys
+      description: Retrieve a list of personal API keys.
+      operationId: get-user-keys
+      parameters:
+      - name: product
+        in: query
+        schema:
+          type: string
+      - name: integration
+        in: query
+        schema:
+          type: string
+      - name: status
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiKeyListResponse'
     post:
-      operationId: post-user-keys
       tags:
-        - User
-        - API Key
-      summary: "Create personal API key"
-      description: "Create a new personal API key."
-      parameters:
-        - name: Cookie
-          in: header
-          required: true
-          schema:
-            type: string
-          description: "Session cookie for authentication"
+      - User
+      - API Key
+      summary: Create personal API key
+      description: Create a new personal API key.
+      operationId: post-user-keys
       requestBody:
         content:
           application/json:
@@ -250,25 +264,18 @@ paths:
               $ref: '#/components/schemas/CreateApiKeyRequest'
       responses:
         '200':
-          description: "OK"
+          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiKey'
     patch:
-      operationId: patch-user-keys
       tags:
-        - User
-        - API Key
-      summary: "Rotate personal API key"
-      description: "Rotate an existing personal API key."
-      parameters:
-        - name: Cookie
-          in: header
-          required: true
-          schema:
-            type: string
-          description: "Session cookie for authentication"
+      - User
+      - API Key
+      summary: Rotate personal API key
+      description: Rotate an existing personal API key.
+      operationId: patch-user-keys
       requestBody:
         content:
           application/json:
@@ -276,25 +283,18 @@ paths:
               $ref: '#/components/schemas/UpdateApiKeyRequest'
       responses:
         '200':
-          description: "OK"
+          description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiKey'
     delete:
-      operationId: delete-user-keys
       tags:
-        - User
-        - API Key
-      summary: "Delete personal API key"
-      description: "Delete an existing personal API key."
-      parameters:
-        - name: Cookie
-          in: header
-          required: true
-          schema:
-            type: string
-          description: "Session cookie for authentication"
+      - User
+      - API Key
+      summary: Delete personal API key
+      description: Delete an existing personal API key.
+      operationId: delete-user-keys
       requestBody:
         content:
           application/json:
@@ -302,43 +302,27 @@ paths:
               $ref: '#/components/schemas/DeleteApiKeyRequest'
       responses:
         '200':
-          description: "OK"
+          description: OK
 components:
   schemas:
-    _float:
-      type: number
-      format: float
-    _double:
-      type: number
-      format: double
     _int:
       type: integer
-    _int32:
-      type: integer
-      format: int32
-    _int64:
-      type: integer
-      format: int32
     _string:
       type: string
-    _date:
-      type: string
-      format: date
-      example: '2025-08-19'
     _timestamp:
       type: string
       format: date-time
-      example: '2025-08-19T12:00:00.000Z'
-    ApiKeyResponse:
-      type: object
-      properties:
-        key:
-          $ref: '#/components/schemas/apiKeyString'
-    apiKeyString:
-      maxLength: 12
-      minLength: 12
+      example: '2025-08-19T12:00:00.0000000+00:00'
+    level:
       type: string
-      format: password
+      enum:
+      - orderflow
+      - classic
+      - state
+      - free
+      - paid
+      - unverified
+      - unpaid
     Child:
       type: object
       properties:
@@ -350,6 +334,27 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/level'
+        commercial_billing_managed:
+          type: boolean
+        commercial_access_suspension:
+          type: object
+          nullable: true
+          properties:
+            previous_level:
+              $ref: '#/components/schemas/level'
+            suspended_at_utc:
+              type: string
+              format: date-time
+            suspended_by:
+              type: string
+              nullable: true
+            resuming_at_utc:
+              type: string
+              format: date-time
+              nullable: true
+            resumed_by:
+              type: string
+              nullable: true
         api_keys:
           type: array
           items:
@@ -397,11 +402,243 @@ components:
       type: object
       properties:
         product:
-          $ref: '#/components/schemas/_string'
+          type: string
+          default: gexbot
         integration:
-          $ref: '#/components/schemas/_string'
+          type: string
+          enum: [custom]
+          default: custom
+        level:
+          type: string
+          enum: [classic, state, orderflow]
         label:
           $ref: '#/components/schemas/_string'
+        expires_in:
+          $ref: '#/components/schemas/_int'
+    CreateChildApiKeyRequest:
+      type: object
+      properties:
+        product:
+          type: string
+          default: gexbot
+        integration:
+          type: string
+          enum: [custom]
+          default: custom
+        label:
+          $ref: '#/components/schemas/_string'
+        expires_in:
+          $ref: '#/components/schemas/_int'
+    ChildSubscriptionChangeRequest:
+      type: object
+      required: [level]
+      properties:
+        level:
+          type: string
+          enum: [classic, state, orderflow]
+    CommercialBillingResponse:
+      type: object
+      required: [estimate, allowed_child_levels, rates, grace_period_hours]
+      properties:
+        estimate:
+          $ref: '#/components/schemas/CommercialBillingEstimate'
+        invoice:
+          nullable: true
+          allOf:
+          - $ref: '#/components/schemas/CommercialBillingInvoice'
+        allowed_child_levels:
+          type: array
+          items:
+            type: string
+            enum: [classic, state, orderflow]
+        rates:
+          type: object
+          description: Monthly seat rate for each commercial tier.
+          additionalProperties:
+            type: number
+        grace_period_hours:
+          type: number
+    CommercialBillingEstimate:
+      type: object
+      required:
+      - parent_user_id
+      - billing_month_eastern
+      - period_start_utc
+      - period_end_utc
+      - daily_charges
+      - seat_days_by_level
+      - usage_subtotal_by_level
+      - pending_grace_periods
+      - usage_subtotal
+      - monthly_base_fee
+      - included_usage_applied
+      - overage
+      - total
+      - currency
+      - pricing_version
+      properties:
+        parent_user_id:
+          type: string
+        billing_month_eastern:
+          type: string
+          pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$'
+        period_start_utc:
+          type: string
+          format: date-time
+        period_end_utc:
+          type: string
+          format: date-time
+        daily_charges:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercialBillingDailyCharge'
+        seat_days_by_level:
+          type: object
+          additionalProperties:
+            type: integer
+        usage_subtotal_by_level:
+          type: object
+          additionalProperties:
+            type: number
+        pending_grace_periods:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommercialBillingPendingGrace'
+        usage_subtotal:
+          type: number
+          description: Measured seat usage before the monthly minimum is applied.
+        monthly_base_fee:
+          type: number
+          description: Minimum keybundle cost.
+        included_usage_applied:
+          type: number
+          description: Measured usage covered by the monthly minimum.
+        overage:
+          type: number
+          description: Measured usage above the monthly minimum.
+        total:
+          type: number
+          description: Amount due. This is the greater of measured usage and the monthly minimum.
+        currency:
+          type: string
+        pricing_version:
+          type: string
+    CommercialBillingDailyCharge:
+      type: object
+      required:
+      - billing_date_eastern
+      - child_user_id
+      - level
+      - confirmed_at_utc
+      - grace_applied
+      - source_event_ids
+      properties:
+        billing_date_eastern:
+          type: string
+          format: date
+        child_user_id:
+          type: string
+        level:
+          type: string
+          enum: [classic, state, orderflow]
+        confirmed_at_utc:
+          type: string
+          format: date-time
+        grace_applied:
+          type: boolean
+        source_event_ids:
+          type: array
+          items:
+            type: string
+    CommercialBillingPendingGrace:
+      type: object
+      required: [child_user_id, level, started_at_utc, confirms_at_utc]
+      properties:
+        child_user_id:
+          type: string
+        level:
+          type: string
+          enum: [classic, state, orderflow]
+        started_at_utc:
+          type: string
+          format: date-time
+        confirms_at_utc:
+          type: string
+          format: date-time
+    CommercialBillingInvoice:
+      type: object
+      required:
+      - parent_user_id
+      - billing_month_eastern
+      - period_start_utc
+      - period_end_utc
+      - pricing_version
+      - usage_subtotal
+      - monthly_base_fee
+      - included_usage_applied
+      - overage
+      - total
+      - currency
+      - status
+      - stripe_draft_revision
+      - calculated_at_utc
+      properties:
+        parent_user_id:
+          type: string
+        billing_month_eastern:
+          type: string
+          pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$'
+        period_start_utc:
+          type: string
+          format: date-time
+        period_end_utc:
+          type: string
+          format: date-time
+        pricing_version:
+          type: string
+        usage_subtotal:
+          type: number
+          description: Measured seat usage before the monthly minimum is applied.
+        monthly_base_fee:
+          type: number
+          description: Minimum keybundle cost.
+        included_usage_applied:
+          type: number
+          description: Measured usage covered by the monthly minimum.
+        overage:
+          type: number
+          description: Measured usage above the monthly minimum.
+        total:
+          type: number
+          description: Amount due. This is the greater of measured usage and the monthly minimum.
+        currency:
+          type: string
+        status:
+          type: string
+          enum: [review_pending, creating_stripe_draft, recreating_stripe_draft, stripe_draft, draft_creation_failed]
+          description: Stripe draft workflow status.
+        stripe_invoice_id:
+          type: string
+          nullable: true
+        stripe_invoice_status:
+          type: string
+          nullable: true
+        hosted_invoice_url:
+          type: string
+          format: uri
+          nullable: true
+        stripe_draft_revision:
+          type: integer
+          minimum: 0
+        calculation_version:
+          type: integer
+        calculated_at_utc:
+          type: string
+          format: date-time
+        finalized_at_utc:
+          type: string
+          format: date-time
+          nullable: true
     CreateApiKeyRequest:
       type: object
       properties:
@@ -431,29 +668,17 @@ components:
           $ref: '#/components/schemas/_string'
         product:
           $ref: '#/components/schemas/_string'
-    level:
-      enum:
-        - orderflow
-        - classic
-        - state
-        - free
-        - paid
-        - unverified
-        - unpaid
-      type: string
   securitySchemes:
-    apiKeyHeader:
+    authorizationApiKey:
       type: apiKey
-      name: Ocp-Apim-Subscription-Key
       in: header
-    nfaBearerAuth:
-      type: http
-      scheme: bearer
+      name: Authorization
 security:
-  - apiKeyHeader: [ ]
-  - nfaBearerAuth: [ ]
+- authorizationApiKey: []
 tags:
-  - name: Authentication
-    description: Authentication
-  - name: User
-    description: User operations
+- name: User
+  description: User operations
+- name: API Key
+  description: API key operations
+- name: Children
+  description: Child account operations

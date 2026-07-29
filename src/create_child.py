@@ -8,21 +8,18 @@ from client import NfaApiError, NfaCommercialClient
 
 
 PRODUCT = "gexbot"
-INTEGRATION = "custom"
+LEVEL = "classic"
 ONE_YEAR_SECONDS = 365 * 24 * 60 * 60
 
 
 def main():
     load_env()
 
-    client = NfaCommercialClient(
-        api_key=os.environ["NFA_API_KEY"],
-        base_url=os.getenv("NFA_BASE_URL", "https://business.gexbot.com"),
-    )
+    client = NfaCommercialClient(api_key=os.environ["NFA_API_KEY"])
 
     result = client.create_child(
+        level=LEVEL,
         product=PRODUCT,
-        integration=INTEGRATION,
         label=f"api_demo_{int(time.time())}",
         expires_in=ONE_YEAR_SECONDS,
     )
